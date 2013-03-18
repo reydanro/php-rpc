@@ -2,7 +2,7 @@
     
     // First include the core file
     include ('rpc.core.php');
-    include ('common.php');
+    include ('common.php');    
 
     ////////////////////////////////////////////////////////////////////////////
     // Include all other rpc files
@@ -15,6 +15,7 @@
     
     ////////////////////////////////////////////////////////////////////////////
     // Include all user methods
+    include("func.php");
     foreach (GetFilesWithRegex(null, "/^func\.(.*).php/") as $inc)
         include ($inc);
 

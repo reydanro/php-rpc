@@ -62,6 +62,9 @@
     
     function safeget($array, $key, $default = null, $esc = true)
     {
+        if ($array === NULL)
+            return $default;
+            
         if (is_array($array) && array_key_exists($key, $array))
         {
             $val = $array[$key];
