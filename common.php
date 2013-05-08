@@ -69,18 +69,23 @@
         
     function safeescape($obj)
     {
-        if ($obj == null)
+        if ($obj === null)
             return null;
             
         if (is_array($obj))
         {
             $ret = array();
             foreach ($obj as $k => $v)
-                $ret[$k] = db()->escape_string($v);
+            {
+                
+                $ret[$k] = safeescape($v);
+            }
             return $ret;
         }
-        else
+        else if(is_string($obj))
             return db()->escape_string($obj);
+            
+        return $obj;
     }
 	 
 ?>

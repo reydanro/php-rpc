@@ -44,6 +44,8 @@
                 echo "Failed to connect to DB";
                 exit();
             }
+            
+            $dbcon->set_charset("utf8");
         }
     }
    

@@ -1,4 +1,11 @@
 <?php
+    
+    function requestSigned()
+    {
+        global $REQUEST_IS_SIGNED;
+        return $REQUEST_IS_SIGNED;
+    }
+
     function GetFilesWithRegex($folder, $regex)
     {
         $ret = array();

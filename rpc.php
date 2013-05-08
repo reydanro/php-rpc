@@ -2,8 +2,10 @@
     
     // First include the core file
     include ('rpc.core.php');
-    include ('common.php');    
+    include ('common.php');
 
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // Include all other rpc files
     foreach (GetFilesWithRegex(null, "/^rpc\.(.*).php/") as $inc)
@@ -21,37 +23,56 @@
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // Always fix attached files
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Always fix any attached files
     $_FIXED_FILES = FixGlobalFilesArray($_FILES);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Fast get of some request parameters
+    $signature = safeget($_REQUEST, "signature", null, false);
+
+    $func = safeget($_REQUEST, "func", null, false);
     
-    
+    $param = safeget($_REQUEST, "param", null, false);
+    if ($param != null)
+    {
+        // Make sure we don't have escaped quotes
+        if (get_magic_quotes_gpc())
+            $param = stripslashes($param);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Now, check if the call is correctly signed.
+    // Compare our own computed signature with the received signature
+    $REQUEST_IS_SIGNED = strcmp(md5($SIGNATURE_SECRET.$func.$param), $signature) == 0;        
     
     ////////////////////////////////////////////////////////////////////////////
-    // Get the method name
-    $func = safeget($_REQUEST, "func", null, false);
-    if ($func == null)
+    // Log the call
+    $now = date("Y-m-d H:i:s");
+    
+    $logline = "[$now][".basename(__FILE__)."] Signed=".$REQUEST_IS_SIGNED." Func=".safeget($_REQUEST, "func", null, false)."   Param=".safeget($_REQUEST, "param", null, false);
+    $logline .= "\r\n";
+    $logname = "calllog_".date("Y-m-d").".txt";
+    file_put_contents($logname, $logline, FILE_APPEND);
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Test the method name
+    if ($func === null)
     {
-        // Can't find the method
         echo "No function name found!";
         exit();
     } 
 
     ////////////////////////////////////////////////////////////////////////////
     // Optionally, get the param
-    $param = safeget($_REQUEST, "param", null, false); 
-    
     if ($param != null)
     {
-        // Make sure we don't have escaped quotes
-        if (get_magic_quotes_gpc())
-            $param = stripslashes($param);
-
         // If we have a param, then try to convert it from json    
         $decode = json_decode($param, true);
         if ($decode != NULL)
             $param = $decode;
     }
-
     
     ////////////////////////////////////////////////////////////////////////////
     // Call the method
